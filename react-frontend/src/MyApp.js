@@ -6,11 +6,15 @@ import Form from  './Form'
 function MyApp() { 
   const [characters, setCharacters] = useState([]);  
 
-  function removeOneCharacter (index) {
-    const updated = characters.filter((character, i) => {
-      return i !== index
-    });
-    setCharacters(updated);
+  function removeOneCharacter(index) {
+    axios.delete(`http://localhost:8000/users/${index}`)
+      .then(response => {
+        const updated = characters.filter((character, i) => i !== index);
+        setCharacters(updated);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 
   function updateList(person) { 
