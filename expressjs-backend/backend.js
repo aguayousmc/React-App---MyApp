@@ -41,16 +41,25 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.get('/users', (req, res) => {
+app.get('/users', (req,res) => {
    const name = req.query.name;
-   if (name != undefined){
-       let result = findUserByName(name);
-       result = {users_list: result};
-       res.send(result);
+   const job = req.query.job;
+   if(name && job){
+      const result = users['users_list'].filter((user) => user.name === name && user.job === job);
+      res.send({users_list: result});
    }
-   else{
-       res.send(users);
+   else if(name){
+      const result = findUserByName(name);
+      res.send({users_list: result});
    }
+   else if(job){
+      const result = findUserByJob(job);
+      res.send({users_list: result});
+   }
+   else {
+      res.send(users);
+   }
+
 });
 
 const findUserByName = (name) => { 
@@ -75,8 +84,9 @@ function findUserById(id) {
 
 app.post('/users', (req, res) => {
    const userToAdd = req.body;
+   userToAdd.id = generateID(6);
    addUser(userToAdd);
-   res.status(200).end();
+   res.status(201).end();
 });
 
 function addUser(user){
@@ -98,22 +108,19 @@ function findUserIndexById(id) {
    return users['users_list'].findIndex((user) => user['id'] === id);
 }
 
-app.get('/users', (req,res) => {
-   const name = req.query.name;
-   const job = req.query.job;
-   if(name != undefined && job != undefined){
-      const result = users['users_list'].filter((user) => user.name === name && user.job === job);
-      res.send({users_list: result});
-   }
-   else {
-      res.send(users);
-   }
-
-});
-
 const findUserByJob = (job) => { 
    return users['users_list'].filter( (user) => user['job'] === job); 
 }
+
+function generateID(length) {
+   let result = '';
+   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+   const charactersLength = characters.length;
+   for (let i = 0; i < length; i++) {
+     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+   }
+   return result;
+ }
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
